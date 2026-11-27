@@ -52,7 +52,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     events = ConsoleEvents()
     try:
-        check_speed(args.speed, events)
+        check_speed(args.speed)  # fail before rendering; Assembly emits the out-of-range warning once
         path = render_and_assemble(args, events)
     except (ValueError, RuntimeError, OSError) as exc:
         print(f"error: {exc}", file=sys.stderr)

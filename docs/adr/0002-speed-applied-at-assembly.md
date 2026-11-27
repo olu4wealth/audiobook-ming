@@ -34,5 +34,7 @@ speed is a property of **Assembly**: the stage that builds the chapter files and
   different pace (a different model prompt, not a different filter) is the honest option.
 - Assembly owns speed, so the finished files and the chapter files always agree; nothing reads speed back
   from the journal.
-- The assembly stage is yet to be written (`folivox_ming.assemble`); until it exists, a render produces the
-  per-chapter audio at natural pace only.
+- Implemented as `folivox_ming.assemble` plus the `render` command: stretched chapter files land in
+  `<book>.chapters/speed-<n>/` (one folder per speed, so two speeds coexist), the M4B's chapter marks are
+  measured from the stretched audio, and each stretched chapter is cached in the journal against the
+  chapter's signature and the speed — a second run at the same speed rebuilds nothing.
