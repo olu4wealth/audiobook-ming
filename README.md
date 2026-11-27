@@ -16,16 +16,22 @@ python -m folivox_ming.install                               # ~3 GB checkpoint 
 folivox providers                                            # `ming` is listed now
 ```
 
-The engine repository is private until a real GPU render has passed; while it is, `pip install` from it needs
-a token or an authenticated `git`. Clone it and `pip install .` instead.
+The engine repository was kept private until a real GPU render passed; that run has now passed (see
+[docs/smoke-test.md](docs/smoke-test.md)), so the gate is clear. Until the repository is actually made public,
+`pip install` from it needs a token or an authenticated `git` — clone it and `pip install .` instead.
 
 The model runs in its own environment (`transformers==4.46.3`, its own torch), not Folivox's: the two cannot
 share one. `python -m folivox_ming.install --check` says what is in place.
 
 Ming-3.0-tts-0.5b needs a CUDA GPU (2.8 GB of weights, comfortable on a 16 GB card). There is no CPU path at
 all: the model asserts `Torch not compiled with CUDA enabled` before it synthesises anything. The install
-itself runs on a CPU-only machine — only the render needs the GPU. See [docs/smoke-test.md](docs/smoke-test.md)
-for the run that proves the model path.
+itself runs on a CPU-only machine — only the render needs the GPU. The model path is proven: a Tesla T4 render
+(15.3 GB card, 3.3 GB peak) produced a chaptered M4B in 64 s, with the model loading in 17 s. See
+[docs/smoke-test.md](docs/smoke-test.md).
+
+Ming's FST text normalizer needs `pynini`, which has no universal wheel; when it is missing the engine turns
+normalization off and reads numbers, dates and units as written rather than failing. Install it in the Engine
+environment (`conda install -c conda-forge pynini==2.1.6`) if you want normalized speech.
 
 ## Render
 

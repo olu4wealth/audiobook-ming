@@ -3,6 +3,9 @@
 The one thing no local test can settle: that Ming loads, what it actually costs, and what sample rate it
 really answers in. One chapter, one bundled voice, about ten minutes of setup.
 
+**Result: passed.** Tesla T4 (15.3 GB), `en-kalynda`, one chapter, speed 1.0 — see
+[Results from the passing run](#results-from-the-passing-run).
+
 Everything here runs on a Kaggle notebook (free 16 GB GPU). Nothing else in the project needs it: the test
 suite runs without a GPU, and the installer's clone/environment/checkpoint steps are already verified on a
 CPU-only machine (2.8 GB of weights, ~1.4 GB environment, a ~215 MB clone).
@@ -99,3 +102,42 @@ Paste back:
 | `did not answer in N s` | Same fragment, stuck: the run resumes; raise `FOLIVOX_SYNTH_TIMEOUT` |
 | Garbled or empty audio | The reference clip: try another `--voice` id from `folivox voices` |
 | Chapter files but no M4B | ffmpeg on the host; `ffmpeg -version` in the notebook |
+
+## Results from the passing run
+
+Kaggle, Tesla T4 (15,360 MiB), driver 580.178.04, one chapter, `en-kalynda`, speed 1.0.
+
+| Measure | Value |
+|---|---|
+| Model load | 17 s (CUDA) |
+| Render to M4B | 64 s |
+| Peak VRAM | 3,333 MB of 15,360 |
+| `sample_rate` | 44,100 Hz (the rate the render recorded, and the rate the chapter file is written at) |
+| Takes | 2 Fragments, 11.03 s of audio |
+| Chapter file | `book.chapters/speed-1/001.flac`, 883 KB |
+| M4B | 99.6 KB, 15.03 s |
+| Chapter mark | `Chapter One`, 0.000–15.030 s — matches the audio |
+
+The stretch path was exercised at speed 1.0, where Assembly copies rather than runs `atempo`, so the speed
+filter itself is still covered only by the CPU suite. Everything else here is real: the checkpoint loaded,
+the warm-up learned 44.1 kHz, the Takes were synthesized on the card, and the chaptered M4B plays.
+
+### What this run caught
+
+Three defects that no local test could reach, all now fixed with regression tests:
+
+- **`soundfile` was never declared.** Assembly imports it and `folivox.audio` needs it, but the wheel listed
+  only `numpy` while Folivox keeps it under its `tts`/`all` extras. `render` failed at import, after the
+  checkpoint had downloaded cleanly.
+- **The narrator's transcript was not passed.** Ming clones a voice from a sample *and its text*; without it
+  Folivox refuses to start. The catalog already carried the transcript.
+- **`pynini` was required, not optional.** Ming's normalizer defaults on and needs `pynini`, which has no
+  universal wheel. The engine now probes for it and disables normalization instead of dying mid-warm-up.
+
+### Harness notes
+
+- Folivox is installed at a pinned commit and `lxml` is constrained below 6: upstream declares `lxml>=5`, the
+  resolver picks 6.2.0, and that has no wheel for this image, so it tries to compile against libxml2 headers
+  that are not present. Without the pin the test fails for reasons unrelated to this package.
+- `faster-whisper` is not installed, so the run reports `rendering without the quality check`. QA scoring is
+  a Folivox extra (`folivox[qa]`), not something this engine depends on.
