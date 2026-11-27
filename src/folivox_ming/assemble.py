@@ -12,7 +12,7 @@ from pathlib import Path
 
 import soundfile as sf
 from folivox.audio import audio_seconds
-from folivox.audio.assemble import BookMeta, ChapterAudio, build_chapter, run
+from folivox.audio.assemble import BookMeta, ChapterAudio, build_chapter, run, write_m4b
 from folivox.journal import Journal
 
 
@@ -75,6 +75,20 @@ def stretch_chapters(work_dir: Path, out_dir: Path, speed: float, events=None) -
     finally:
         journal.close()
     return built
+
+
+def write_audiobook(chapters: list[ChapterAudio], out: Path, meta: BookMeta, cover: bytes | None = None,
+                    bitrate: str = "64k") -> Path:
+    """The chaptered M4B, with marks taken from each Chapter's post-stretch duration.
+
+    Folivox writes the file next to the target and renames it, so a failed encode cannot damage an earlier
+    good book.
+    """
+    if not chapters:
+        raise ValueError("Nothing to assemble: no Chapter is fully rendered")
+    out = Path(out)
+    write_m4b(chapters, out, meta, cover, bitrate)
+    return out
 
 
 def _warn(events, message: str) -> None:
