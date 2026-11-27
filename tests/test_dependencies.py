@@ -30,6 +30,7 @@ ALLOWED = {
     "platformdirs": "a hard requirement of folivox (not an extra), so it is present wherever the host is",
     "torch": "worker.py only, which runs in the Engine environment that Ming's env installs",
     "ming_tts": "worker.py only, from the cloned Ming repo put on the worker's sys.path",
+    "pynini": "optional by design: the worker probes for it and disables text normalization when it is absent",
 }
 STDLIB = set(__import__("sys").stdlib_module_names)
 

@@ -23,8 +23,10 @@ def _log(entry: dict) -> None:
 
 
 class MingTTS:
-    def __init__(self, model_dir, **_ignored):
+    def __init__(self, model_dir, text_normalization=True, **_ignored):
         self.model_dir = model_dir
+        self.text_normalization = text_normalization
+        _log({"construct": True, "text_normalization": text_normalization})
 
     def synthesize(self, *, task, language_id, text, prompt_wav_path, prompt_text, use_spk_emb=True,
                    output_path):

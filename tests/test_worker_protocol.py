@@ -68,6 +68,19 @@ def test_synthesis_returns_mono_float32_at_the_render_rate(engine, voice):
     assert seconds >= 0
 
 
+def test_text_normalisation_is_switched_off_when_pynini_is_absent(engine, voice, log):
+    """Ming's FST normalizer needs pynini, which has no universal wheel.
+
+    Constructing the model with normalization on and no pynini raises during warm-up, after the checkpoint has
+    already loaded — which is exactly how the GPU smoke test failed. Ming documents turning it off instead.
+    """
+    engine.start(voice)
+
+    construct = [entry for entry in log() if entry.get("construct")]
+    assert construct, "the stub never saw the model being constructed"
+    assert construct[-1]["text_normalization"] is False
+
+
 @pytest.mark.parametrize(("text", "task", "language_id"), [
     ("Hello there.", "TTS", "English"),
     ("你好", "TTS", "Chinese"),
