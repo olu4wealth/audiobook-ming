@@ -73,6 +73,18 @@ def venv_python() -> Path:
     return venv_dir() / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
 
 
+# What transformers actually loads. An interrupted download leaves config.json (it is tiny and first) without
+# these, so the config alone must never count as a checkpoint — that is how a half-downloaded install reads
+# as "ready" and then fails at load with "no file named pytorch_model.bin".
+WEIGHT_FILES = ("model.safetensors", "pytorch_model.bin", "model.safetensors.index.json",
+                "pytorch_model.bin.index.json")
+
+
+def weights_present() -> bool:
+    return (weights_dir() / "config.json").is_file() and any(
+        (weights_dir() / name).is_file() for name in WEIGHT_FILES)
+
+
 def is_ready() -> bool:
     """Environment, code and checkpoint all in place (the marker is written only after all three)."""
     try:
@@ -81,7 +93,7 @@ def is_ready() -> bool:
         return False
     if info.get("ref") != REF or not venv_python().is_file():
         return False
-    return (repo_dir() / "ming_tts.py").is_file() and (weights_dir() / "config.json").is_file()
+    return (repo_dir() / "ming_tts.py").is_file() and weights_present()
 
 
 def status() -> str:
@@ -89,7 +101,7 @@ def status() -> str:
         return f"{TITLE} is installed ({weights_dir()})"
     missing = [name for name, ok in (("environment", venv_python().is_file()),
                                      ("inference code", (repo_dir() / "ming_tts.py").is_file()),
-                                     ("checkpoint", (weights_dir() / "config.json").is_file())) if not ok]
+                                     ("checkpoint", weights_present())) if not ok]
     return f"{TITLE} is not installed (missing: {', '.join(missing) or 'the ready marker'})"
 
 
@@ -143,7 +155,7 @@ def install(log: Log = print) -> None:
         _run(["git", "clone", "--depth", "1", "--branch", REF, REPO, str(repo_dir())],
              f"Fetching the Ming code ({REF})", log)
     ensure_runtime(log)
-    if not (weights_dir() / "config.json").is_file():
+    if not weights_present():
         _run([str(venv_python()), "-c",
               "import sys; from huggingface_hub import snapshot_download; "
               f"snapshot_download({MODEL!r}, local_dir=sys.argv[1], max_workers=4)", str(weights_dir())],
