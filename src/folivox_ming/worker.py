@@ -32,6 +32,9 @@ STATE: dict = {}
 
 
 def main() -> None:
+    # Requests arrive as UTF-8 JSON: the engine writes UTF-8 whatever the console code page is, and stdin's
+    # default (the locale, with surrogateescape) would turn CJK text into lone surrogates before synthesis.
+    sys.stdin.reconfigure(encoding="utf-8")
     proto = os.fdopen(os.dup(1), "w", buffering=1, encoding="utf-8")
     os.dup2(2, 1)  # stray prints from the libraries must not corrupt the protocol channel
     sys.stdout = sys.stderr
@@ -58,7 +61,7 @@ def main() -> None:
 
                 from ming_tts import MingTTS
 
-                STATE["model"] = MingTTS(req["model_dir"])
+                STATE["model"] = MingTTS(req["model_dir"], text_normalization=_has_pynini())
                 load_s = time.time() - t0
                 sample_rate, warm_s = 0, 0.0
                 if req.get("warmup"):
@@ -81,6 +84,20 @@ def main() -> None:
         except Exception as e:  # noqa: BLE001 — report and keep serving
             traceback.print_exc()
             reply({"ok": False, "error": f"{type(e).__name__}: {e}"})
+
+
+def _has_pynini() -> bool:
+    """Whether Ming's FST text normalizer can be switched on.
+
+    It needs ``pynini``, which has no universal wheel (Ming's README says to prefer conda). Without it the model
+    still synthesizes; it just reads numbers, dates and units as written. Turning normalization off explicitly
+    is what Ming documents, and is the difference between a render and a hard failure on a host without it.
+    """
+    try:
+        import pynini  # noqa: F401
+    except Exception:  # noqa: BLE001 — any import failure means "not usable here"
+        return False
+    return True
 
 
 def generate(text: str, ref_wav: str, ref_text: str, task: str, language_id: str, seed: int,

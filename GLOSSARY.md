@@ -78,5 +78,6 @@ _Avoid_: stitching, merge, export
 
 **Reading speed** *(ours)*:
 A multiplier on playback pace, applied to the audio at Assembly (`atempo`), never to the Takes and never part
-of their key. See [ADR 0002](docs/adr/0002-speed-applied-at-assembly.md).
+of their key. Its chapter files live in their own speed folder, `<book>.chapters/speed-<n>/`, so a second
+speed never overwrites the first. See [ADR 0002](docs/adr/0002-speed-applied-at-assembly.md).
 _Avoid_: tempo, rate, tts speed, --speed

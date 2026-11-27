@@ -1,6 +1,6 @@
 # Spec 0001 — Audiobooks on Ming-3.0-tts
 
-Status: ready for an agent. Tracker: not published (no issue tracker configured; this file is the record).
+Status: ready for an agent. Tracked in [issue #1](https://github.com/olu4wealth/audiobook-ming/issues/1); this file is the record.
 
 Vocabulary is the project's: [GLOSSARY](../../GLOSSARY.md). Decisions live in
 [ADR 0001](../adr/0001-ming-as-out-of-tree-provider.md) and
