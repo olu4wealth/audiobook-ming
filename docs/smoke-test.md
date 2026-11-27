@@ -3,8 +3,8 @@
 The one thing no local test can settle: that Ming loads, what it actually costs, and what sample rate it
 really answers in. One chapter, one bundled voice, about ten minutes of setup.
 
-**Result: passed.** Tesla T4 (15.3 GB), `en-kalynda`, one chapter, speed 1.0 — see
-[Results from the passing run](#results-from-the-passing-run).
+**Result: passed.** Tesla T4 (15.3 GB), `en-kalynda`, one chapter — a render at speed 1.0 and a second pass at
+1.1 through the same work folder. See [Results from the passing run](#results-from-the-passing-run).
 
 Everything here runs on a Kaggle notebook (free 16 GB GPU). Nothing else in the project needs it: the test
 suite runs without a GPU, and the installer's clone/environment/checkpoint steps are already verified on a
@@ -90,8 +90,10 @@ Paste back:
 - **`takes`** — how many Fragments the chapter became, and their total audio seconds.
 - **Wall clock** — time from `render` to the M4B, and the load portion from the progress lines.
 - **VRAM used during the run** — the engine prints a peak per take; compare with the 16 GB budget.
-- **Whether the M4B's one chapter mark has the right title and duration** — the assembly's stretch path was
-  exercised on CPU only, with a 1.0 speed here.
+- **Whether the M4B's one chapter mark has the right title and duration.**
+- **A second render at another speed through the same work folder** — seconds, not a re-render, if the Takes
+  are untouched and the M4B comes out shorter by the speed factor. That is the ADR 0002 claim; measure it,
+  don't assume it.
 
 ## What to do with a failure
 
@@ -105,22 +107,36 @@ Paste back:
 
 ## Results from the passing run
 
-Kaggle, Tesla T4 (15,360 MiB), driver 580.178.04, one chapter, `en-kalynda`, speed 1.0.
+Kaggle, Tesla T4 (15,360 MiB), driver 580.178.04, one chapter, `en-kalynda`. Two renders: the first at speed
+1.0, the second of the same Book at 1.1 through the same work folder.
 
 | Measure | Value |
 |---|---|
 | Model load | 17 s (CUDA) |
-| Render to M4B | 64 s |
+| First render (speed 1.0) | 64 s |
 | Peak VRAM | 3,333 MB of 15,360 |
 | `sample_rate` | 44,100 Hz (the rate the render recorded, and the rate the chapter file is written at) |
 | Takes | 2 Fragments, 11.03 s of audio |
 | Chapter file | `book.chapters/speed-1/001.flac`, 883 KB |
-| M4B | 99.6 KB, 15.03 s |
+| M4B at speed 1.0 | 99.6 KB, 15.03 s |
 | Chapter mark | `Chapter One`, 0.000–15.030 s — matches the audio |
 
-The stretch path was exercised at speed 1.0, where Assembly copies rather than runs `atempo`, so the speed
-filter itself is still covered only by the CPU suite. Everything else here is real: the checkpoint loaded,
-the warm-up learned 44.1 kHz, the Takes were synthesized on the card, and the chaptered M4B plays.
+### The second pass: speed 1.1
+
+| Measure | Value |
+|---|---|
+| Second render | **2 s** (against 64 s) |
+| Takes rewritten | none — mtimes identical before and after |
+| M4B at speed 1.1 | 13.644 s |
+| Speed ratio | 1.1016 (expected 1.1) |
+| Stretched chapter | `book.chapters/speed-1.1/001.flac`, 13.644 s |
+
+This is ADR 0002's claim, measured rather than argued: the second run's stderr has no "Loading TTS model" and
+no "Warming up" — it goes straight from planning to `Encoding M4B`. The model was never loaded, no Take was
+re-synthesized, and the audio came out 1.1x shorter because `atempo` did the work at Assembly.
+
+Everything here is real: the checkpoint loaded, the warm-up learned 44.1 kHz, the Takes were synthesized on the
+card, and both chaptered M4Bs play.
 
 ### What this run caught
 

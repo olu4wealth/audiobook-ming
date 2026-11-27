@@ -26,7 +26,8 @@ share one. `python -m folivox_ming.install --check` says what is in place.
 Ming-3.0-tts-0.5b needs a CUDA GPU (2.8 GB of weights, comfortable on a 16 GB card). There is no CPU path at
 all: the model asserts `Torch not compiled with CUDA enabled` before it synthesises anything. The install
 itself runs on a CPU-only machine — only the render needs the GPU. The model path is proven: a Tesla T4 render
-(15.3 GB card, 3.3 GB peak) produced a chaptered M4B in 64 s, with the model loading in 17 s. See
+(15.3 GB card, 3.3 GB peak) produced a chaptered M4B in 64 s with the model loading in 17 s, and a second pass
+of the same Book at speed 1.1 took **2 s** without re-synthesising a single Take. See
 [docs/smoke-test.md](docs/smoke-test.md).
 
 Ming's FST text normalizer needs `pynini`, which has no universal wheel; when it is missing the engine turns
