@@ -22,8 +22,10 @@ a token or an authenticated `git`. Clone it and `pip install .` instead.
 The model runs in its own environment (`transformers==4.46.3`, its own torch), not Folivox's: the two cannot
 share one. `python -m folivox_ming.install --check` says what is in place.
 
-Ming-3.0-tts-0.5b needs a CUDA GPU (~3 GB of VRAM, comfortable on a 16 GB card) and is time-consuming
-without one. There is no CPU path worth waiting for.
+Ming-3.0-tts-0.5b needs a CUDA GPU (2.8 GB of weights, comfortable on a 16 GB card). There is no CPU path at
+all: the model asserts `Torch not compiled with CUDA enabled` before it synthesises anything. The install
+itself runs on a CPU-only machine — only the render needs the GPU. See [docs/smoke-test.md](docs/smoke-test.md)
+for the run that proves the model path.
 
 ## Render
 

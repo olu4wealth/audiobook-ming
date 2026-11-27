@@ -4,7 +4,12 @@ The one thing no local test can settle: that Ming loads, what it actually costs,
 really answers in. One chapter, one bundled voice, about ten minutes of setup.
 
 Everything here runs on a Kaggle notebook (free 16 GB GPU). Nothing else in the project needs it: the test
-suite runs without a GPU, and the installer's clone/environment/checkpoint steps are already verified on CPU.
+suite runs without a GPU, and the installer's clone/environment/checkpoint steps are already verified on a
+CPU-only machine (2.8 GB of weights, ~1.4 GB environment, a ~215 MB clone).
+
+There is no CPU fallback to try in the meantime: loading the checkpoint on a CPU-only torch fails inside Ming
+with `AssertionError: Torch not compiled with CUDA enabled`, before any synthesis. `scripts/cpu_probe.py` is
+the probe that established this; on a GPU host it is also the fastest way to read the true sample rate.
 
 ## Before you start
 

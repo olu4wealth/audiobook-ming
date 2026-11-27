@@ -108,7 +108,10 @@ def status() -> str:
 def _run(cmd: list[str], what: str, log: Log) -> None:
     log(what)
     try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=STEP_TIMEOUT)  # noqa: S603 — argv, no shell
+        # explicit UTF-8: a Windows console code page cannot decode git/pip/Hugging Face messages about
+        # non-ASCII paths, and the traceback would hide the step's real output
+        r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",  # noqa: S603
+                           timeout=STEP_TIMEOUT)
     except subprocess.TimeoutExpired:
         raise InstallError(f"{what} did not finish in {STEP_TIMEOUT / 3600:.0f} h and was stopped") from None
     except OSError as e:
