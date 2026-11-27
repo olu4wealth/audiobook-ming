@@ -67,7 +67,8 @@ def render_and_assemble(args: argparse.Namespace, events: Events) -> Path:
         events.warning(note)
     narrator = _voice(args.voice)
     opts = RenderOptions(output=args.out, work_dir=args.work_dir, tts=ENGINE, device=args.device,
-                         voice_wav=Path(narrator.path), bitrate=args.bitrate)
+                         voice_wav=Path(narrator.path), voice_text=narrator.transcript,
+                         bitrate=args.bitrate)
     render(book, opts, events)
     meta = BookMeta(title=book.title or args.book.stem, author=book.author, year=book.year,
                     comment=book.annotation, narrator=narrator.name)

@@ -72,6 +72,29 @@ def test_a_second_speed_reuses_the_takes(tmp_path, book_file, work_folder, stub_
     assert (tmp_path / "b.chapters" / "speed-0.9").is_dir()
 
 
+def test_the_narrator_transcript_reaches_the_render(tmp_path, book_file, work_folder, stub_render):
+    """Ming clones a voice from a sample *and its transcript*; without it Folivox refuses to start.
+
+    The catalog carries the transcript, so the CLI must hand it on — the GPU run failed on exactly this.
+    """
+    opts_seen = {}
+    original = cli.render
+
+    def capture(book, opts, events=None):
+        opts_seen.update(vars(opts))
+        return original(book, opts, events)
+
+    cli.render = capture  # type: ignore[assignment]
+    try:
+        code = _run(["render", str(book_file), "--out", str(tmp_path / "book.m4b"),
+                     "--work-dir", str(work_folder.dir), "--voice", "en-kalynda"])
+    finally:
+        cli.render = original  # type: ignore[assignment]
+
+    assert code == 0
+    assert opts_seen["voice_text"], "the voice sample's transcript was not passed to the render"
+
+
 def test_impossible_speed_fails_before_rendering(tmp_path, book_file, work_folder, stub_render, capsys):
     code = _run(["render", str(book_file), "--out", str(tmp_path / "book.m4b"),
                  "--work-dir", str(work_folder.dir), "--speed", "0"])
