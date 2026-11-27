@@ -32,6 +32,9 @@ STATE: dict = {}
 
 
 def main() -> None:
+    # Requests arrive as UTF-8 JSON: the engine writes UTF-8 whatever the console code page is, and stdin's
+    # default (the locale, with surrogateescape) would turn CJK text into lone surrogates before synthesis.
+    sys.stdin.reconfigure(encoding="utf-8")
     proto = os.fdopen(os.dup(1), "w", buffering=1, encoding="utf-8")
     os.dup2(2, 1)  # stray prints from the libraries must not corrupt the protocol channel
     sys.stdout = sys.stderr
