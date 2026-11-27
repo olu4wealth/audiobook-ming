@@ -22,7 +22,7 @@ def _probe(path, entries: str = "chapter") -> dict:
 
 def test_one_chapter_mark_per_chapter_in_order_with_titles(tmp_path, work_folder):
     out = tmp_path / "book.m4b"
-    chapters = stretch_chapters(work_folder.dir, tmp_path / "out", speed=1.0)
+    chapters = stretch_chapters(work_folder.dir, tmp_path / "book.m4b", speed=1.0)
 
     write_audiobook(chapters, out, META)
 
@@ -33,7 +33,7 @@ def test_one_chapter_mark_per_chapter_in_order_with_titles(tmp_path, work_folder
 
 def test_marks_follow_the_stretched_durations(tmp_path, work_folder):
     out = tmp_path / "fast.m4b"
-    chapters = stretch_chapters(work_folder.dir, tmp_path / "out", speed=1.15)
+    chapters = stretch_chapters(work_folder.dir, tmp_path / "book.m4b", speed=1.15)
 
     write_audiobook(chapters, out, META)
 
@@ -46,7 +46,7 @@ def test_marks_follow_the_stretched_durations(tmp_path, work_folder):
 
 def test_book_metadata_reaches_the_file(tmp_path, work_folder):
     out = tmp_path / "book.m4b"
-    write_audiobook(stretch_chapters(work_folder.dir, tmp_path / "out", speed=1.0), out, META)
+    write_audiobook(stretch_chapters(work_folder.dir, tmp_path / "book.m4b", speed=1.0), out, META)
 
     tags = _probe(out, "format_tags")["format"]["tags"]
     assert tags["title"].lower() == "fixture book"
@@ -54,7 +54,7 @@ def test_book_metadata_reaches_the_file(tmp_path, work_folder):
 
 
 def test_cover_is_optional_and_attached_when_given(tmp_path, work_folder):
-    chapters = stretch_chapters(work_folder.dir, tmp_path / "out", speed=1.0)
+    chapters = stretch_chapters(work_folder.dir, tmp_path / "book.m4b", speed=1.0)
     plain = tmp_path / "plain.m4b"
     write_audiobook(chapters, plain, META)
     assert not [s for s in _probe(plain, "stream")["streams"] if s["codec_type"] == "video"]
@@ -70,7 +70,7 @@ def test_cover_is_optional_and_attached_when_given(tmp_path, work_folder):
 
 def test_unrendered_chapter_never_becomes_a_mark(tmp_path, work_folder_factory):
     partial = work_folder_factory(["Opening", "The Long Road"], rendered=1)
-    chapters = stretch_chapters(partial.dir, tmp_path / "out", speed=1.0)
+    chapters = stretch_chapters(partial.dir, tmp_path / "book.m4b", speed=1.0)
     out = tmp_path / "partial.m4b"
 
     write_audiobook(chapters, out, META)

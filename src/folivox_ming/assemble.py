@@ -30,7 +30,7 @@ def assemble(work_dir: Path, out: Path, speed: float = 1.0, meta: BookMeta | Non
              cover: bytes | None = None, events=None, bitrate: str = "64k") -> Path:
     """Stretch every finished Chapter to ``speed`` and write the chaptered M4B beside ``out``."""
     check_speed(speed, events)
-    chapters = stretch_chapters(work_dir, Path(out).parent, speed, events, book_stem=Path(out).stem)
+    chapters = stretch_chapters(work_dir, out, speed, events)
     return write_audiobook(chapters, out, meta or journal_meta(work_dir), cover, bitrate)
 
 
@@ -44,16 +44,15 @@ def journal_meta(work_dir: Path) -> BookMeta:
     return BookMeta(title=title)
 
 
-def stretch_chapters(work_dir: Path, out_parent: Path, speed: float, events=None,
-                     book_stem: str = "") -> list[ChapterAudio]:
+def stretch_chapters(work_dir: Path, out: Path, speed: float, events=None) -> list[ChapterAudio]:
     """Every fully rendered Chapter, stretched to ``speed``, in chapter order.
 
     Chapters whose render is incomplete are skipped with a warning rather than assembled from half a chapter.
     A chapter already stretched to this speed is reused as it stands.
     """
-    work_dir = Path(work_dir)
-    target = _target_folder(out_parent, book_stem, speed)
-    scratch = Path(out_parent) / "_built"
+    work_dir, out = Path(work_dir), Path(out)
+    target = folder_for(out, speed)
+    scratch = out.parent / "_built"
     journal = Journal(work_dir)
     built: list[ChapterAudio] = []
     try:
@@ -112,12 +111,6 @@ def write_audiobook(chapters: list[ChapterAudio], out: Path, meta: BookMeta, cov
     out = Path(out)
     write_m4b(chapters, out, meta, cover, bitrate)
     return out
-
-
-def _target_folder(out_parent: Path, book_stem: str, speed: float) -> Path:
-    if book_stem:
-        return folder_for(Path(out_parent) / f"{book_stem}.m4b", speed)
-    return Path(out_parent) / f"speed-{speed:g}"
 
 
 def check_speed(speed: float, events=None) -> None:

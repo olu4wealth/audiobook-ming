@@ -20,7 +20,7 @@ def _digests(folder) -> dict[str, str]:
 
 
 def test_returns_chapters_in_order_with_measured_durations(tmp_path, work_folder):
-    out = tmp_path / "out"
+    out = tmp_path / "book.m4b"
 
     built = stretch_chapters(work_folder.dir, out, speed=1.0)
 
@@ -31,9 +31,9 @@ def test_returns_chapters_in_order_with_measured_durations(tmp_path, work_folder
 
 
 def test_speed_changes_duration_of_the_written_files(tmp_path, work_folder):
-    faster = stretch_chapters(work_folder.dir, tmp_path / "fast", speed=1.15)
-    slower = stretch_chapters(work_folder.dir, tmp_path / "slow", speed=0.85)
-    plain = stretch_chapters(work_folder.dir, tmp_path / "plain", speed=1.0)
+    faster = stretch_chapters(work_folder.dir, tmp_path / "fast.m4b", speed=1.15)
+    slower = stretch_chapters(work_folder.dir, tmp_path / "slow.m4b", speed=0.85)
+    plain = stretch_chapters(work_folder.dir, tmp_path / "plain.m4b", speed=1.0)
 
     assert faster[0].duration == pytest.approx(plain[0].duration / 1.15, rel=0.02)
     assert slower[0].duration == pytest.approx(plain[0].duration / 0.85, rel=0.02)
@@ -44,15 +44,15 @@ def test_takes_and_folivox_chapter_files_are_left_alone(tmp_path, work_folder):
     takes_before = _digests(work_folder.takes_dir)
     chapters_before = _digests(work_folder.chapters_dir)
 
-    stretch_chapters(work_folder.dir, tmp_path / "out", speed=1.15)
+    stretch_chapters(work_folder.dir, tmp_path / "book.m4b", speed=1.15)
 
     assert _digests(work_folder.takes_dir) == takes_before
     assert _digests(work_folder.chapters_dir) == chapters_before
 
 
 def test_each_speed_gets_its_own_folder_and_nothing_is_overwritten(tmp_path, work_folder):
-    plain = stretch_chapters(work_folder.dir, tmp_path / "out", speed=1.0)
-    stretched = stretch_chapters(work_folder.dir, tmp_path / "out", speed=1.15)
+    plain = stretch_chapters(work_folder.dir, tmp_path / "book.m4b", speed=1.0)
+    stretched = stretch_chapters(work_folder.dir, tmp_path / "book.m4b", speed=1.15)
 
     assert plain[0].path != stretched[0].path
     assert plain[0].path.is_file() and stretched[0].path.is_file()
