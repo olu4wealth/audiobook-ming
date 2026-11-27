@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "folivox-ming"
+version = "0.1.0"
+description = "Ming-3.0-tts as an out-of-tree speech engine for Folivox audiobooks"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = { text = "MIT" }
+# Folivox is installed separately (git+https://github.com/vatavale/folivox) and is the host of this plugin;
+# it is deliberately not a hard dependency here, so a new Folivox checkout does not re-resolve this package.
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+install = ["huggingface_hub>=0.24"]
+
+# The integration point: Folivox's Registry loads this entry point on first use and calls register().
+[project.entry-points."folivox.providers"]
+ming = "folivox_ming:register"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
