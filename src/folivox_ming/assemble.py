@@ -29,7 +29,7 @@ def folder_for(out: Path, speed: float) -> Path:
 def assemble(work_dir: Path, out: Path, speed: float = 1.0, meta: BookMeta | None = None,
              cover: bytes | None = None, events=None, bitrate: str = "64k") -> Path:
     """Stretch every finished Chapter to ``speed`` and write the chaptered M4B beside ``out``."""
-    _check_speed(speed, events)
+    check_speed(speed, events)
     chapters = stretch_chapters(work_dir, Path(out).parent, speed, events, book_stem=Path(out).stem)
     return write_audiobook(chapters, out, meta or journal_meta(work_dir), cover, bitrate)
 
@@ -120,7 +120,7 @@ def _target_folder(out_parent: Path, book_stem: str, speed: float) -> Path:
     return Path(out_parent) / f"speed-{speed:g}"
 
 
-def _check_speed(speed: float, events) -> None:
+def check_speed(speed: float, events=None) -> None:
     if isinstance(speed, bool) or not isinstance(speed, (int, float)) or speed != speed \
             or math.isinf(speed) or speed <= 0:
         raise ValueError(f"reading speed must be a positive number, got {speed!r}")
