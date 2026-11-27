@@ -16,9 +16,8 @@ python -m folivox_ming.install                               # ~3 GB checkpoint 
 folivox providers                                            # `ming` is listed now
 ```
 
-The engine repository was kept private until a real GPU render passed; that run has now passed (see
-[docs/smoke-test.md](docs/smoke-test.md)), so the gate is clear. Until the repository is actually made public,
-`pip install` from it needs a token or an authenticated `git` — clone it and `pip install .` instead.
+The engine repository stayed private until a real GPU render passed; that run has since passed (see
+[docs/smoke-test.md](docs/smoke-test.md)) and the repository is public, so the install above works as written.
 
 The model runs in its own environment (`transformers==4.46.3`, its own torch), not Folivox's: the two cannot
 share one. `python -m folivox_ming.install --check` says what is in place.
