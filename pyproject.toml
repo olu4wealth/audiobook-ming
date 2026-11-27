@@ -11,7 +11,9 @@ requires-python = ">=3.10,<3.13"
 license = { text = "MIT" }
 # Folivox is installed separately (git+https://github.com/vatavale/folivox) and is the host of this plugin;
 # it is deliberately not a hard dependency here, so a new Folivox checkout does not re-resolve this package.
-dependencies = ["numpy"]
+# soundfile is, though: Assembly reads chapter durations through it, and Folivox only declares it under its
+# `tts`/`all` extras — a plain `pip install folivox` leaves it out, so Assembly could not even import.
+dependencies = ["numpy", "soundfile>=0.12"]
 
 [project.optional-dependencies]
 install = ["huggingface_hub>=0.24"]
